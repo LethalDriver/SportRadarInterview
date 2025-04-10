@@ -18,39 +18,17 @@ public class InMemoryScoreboard implements Scoreboard {
 
     @Override
     public void startMatch(String homeTeam, String awayTeam) {
-        if (homeTeam == null || awayTeam == null) {
-            throw new IllegalArgumentException("Team names cannot be null");
-        }
-
-        if (homeTeam.isBlank() || awayTeam.isBlank()) {
-            throw new IllegalArgumentException("Team names cannot be empty");
-        }
+        throwIfNamesNullOrBlank(homeTeam, awayTeam);
 
         homeTeam = homeTeam.trim();
         awayTeam = awayTeam.trim();
 
-        if (homeTeam.equals(awayTeam)) {
-            throw new DuplicateTeamNamesException("Home and away teams cannot be the same");
-        }
+        throwIfNamesAreEqual(homeTeam, awayTeam);
 
         for (Match match : matches) {
-            if (match.getHomeTeam().equals(homeTeam) && match.getAwayTeam().equals(awayTeam)) {
-                throw new MatchAlreadyExistsException(
-                        String.format("Match already exists for teams: %s vs %s", homeTeam, awayTeam)
-                );
-            }
-
-            if (match.getHomeTeam().equals(homeTeam)) {
-                throw new TeamAlreadyInMatchException(
-                        String.format("Team %s is already in a match", homeTeam)
-                );
-            }
-
-            if (match.getAwayTeam().equals(awayTeam)) {
-                throw new TeamAlreadyInMatchException(
-                        String.format("Team %s is already in a match", awayTeam)
-                );
-            }
+            throwIfMatchEqual(match, homeTeam, awayTeam);
+            throwIfTeamInAMatch(match, homeTeam);
+            throwIfTeamInAMatch(match, awayTeam);
         }
 
         matches.add(new Match(homeTeam, awayTeam));
@@ -71,5 +49,43 @@ public class InMemoryScoreboard implements Scoreboard {
         return matches.stream()
                 .map(match -> new MatchScore(match.getHomeTeam(), match.getAwayTeam(), match.getHomeScore(), match.getAwayScore()))
                 .toList();
+    }
+
+    private void throwIfNamesNullOrBlank(String homeTeam, String awayTeam) {
+        if (homeTeam == null || awayTeam == null) {
+            throw new IllegalArgumentException("Team names cannot be null");
+        }
+
+        if (homeTeam.isBlank() || awayTeam.isBlank()) {
+            throw new IllegalArgumentException("Team names cannot be empty");
+        }
+    }
+
+    private void throwIfNamesAreEqual(String homeTeam, String awayTeam) {
+        if (homeTeam.equals(awayTeam)) {
+            throw new DuplicateTeamNamesException("Home and away team names cannot be the same");
+        }
+    }
+
+    private void throwIfMatchEqual(Match existingMatch, String homeTeam, String awayTeam) {
+        if (existingMatch.getHomeTeam().equals(homeTeam) && existingMatch.getAwayTeam().equals(awayTeam)) {
+            throw new MatchAlreadyExistsException(
+                    String.format("Match already exists for teams: %s vs %s", homeTeam, awayTeam)
+            );
+        }
+    }
+
+    private void throwIfTeamInAMatch(Match existingMatch, String team) {
+        if (existingMatch.getHomeTeam().equals(team)) {
+            throw new TeamAlreadyInMatchException(
+                    String.format("Team %s is already in a match", team)
+            );
+        }
+
+        if (existingMatch.getAwayTeam().equals(team)) {
+            throw new TeamAlreadyInMatchException(
+                    String.format("Team %s is already in a match", team)
+            );
+        }
     }
 }
