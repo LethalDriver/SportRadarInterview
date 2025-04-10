@@ -135,4 +135,18 @@ public class InMemoryScoreboardTest {
         assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @DisplayName("should throw exception when team is already in a match")
+    @Test
+    void startMatch_shouldThrowException_whenTeamIsAlreadyInAMatch() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+
+        assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, "Argentina"))
+                .isInstanceOf(MatchAlreadyExistsException.class);
+        assertThatThrownBy(() -> scoreboard.startMatch("Argentina", awayTeam))
+                .isInstanceOf(MatchAlreadyExistsException.class);
+    }
 }
