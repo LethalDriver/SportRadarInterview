@@ -4,6 +4,7 @@ import com.example.sportradar.api.MatchScore;
 import com.example.sportradar.api.Scoreboard;
 import com.example.sportradar.api.exceptions.DuplicateTeamNamesException;
 import com.example.sportradar.api.exceptions.MatchAlreadyExistsException;
+import com.example.sportradar.api.exceptions.TeamAlreadyInMatchException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,7 +63,6 @@ public class InMemoryScoreboardTest {
         String homeTeam = "Spain";
         String awayTeam = "Brazil";
 
-        scoreboard.startMatch(homeTeam, awayTeam);
         scoreboard.startMatch(homeTeam, awayTeam);
 
         assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
@@ -145,8 +145,8 @@ public class InMemoryScoreboardTest {
         scoreboard.startMatch(homeTeam, awayTeam);
 
         assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, "Argentina"))
-                .isInstanceOf(MatchAlreadyExistsException.class);
+                .isInstanceOf(TeamAlreadyInMatchException.class);
         assertThatThrownBy(() -> scoreboard.startMatch("Argentina", awayTeam))
-                .isInstanceOf(MatchAlreadyExistsException.class);
+                .isInstanceOf(TeamAlreadyInMatchException.class);
     }
 }
