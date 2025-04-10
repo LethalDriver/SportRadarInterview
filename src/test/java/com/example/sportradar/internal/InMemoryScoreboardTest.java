@@ -2,6 +2,7 @@ package com.example.sportradar.internal;
 
 import com.example.sportradar.api.MatchScore;
 import com.example.sportradar.api.Scoreboard;
+import com.example.sportradar.api.exceptions.DuplicateTeamNamesException;
 import com.example.sportradar.api.exceptions.MatchAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -98,5 +99,40 @@ public class InMemoryScoreboardTest {
                 Arguments.of("Spain", null),
                 Arguments.of(null, null)
         );
+    }
+
+    @DisplayName("should throw exception when both teams are the same")
+    @Test
+    void startMatch_shouldThrowException_whenBothTeamsAreTheSame() {
+        String team = "Spain";
+
+        assertThatThrownBy(() -> scoreboard.startMatch(team, team))
+                .isInstanceOf(DuplicateTeamNamesException.class);
+    }
+
+    @DisplayName("should trim whitespaces from team names")
+    @Test
+    void startMatch_shouldTrimWhitespacesFromTeamNames() {
+        String homeTeam = "   Spain   ";
+        String awayTeam = "   Brazil   ";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(1)
+                .first()
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam)
+                .containsExactly("Spain", "Brazil");
+    }
+
+    @DisplayName("should throw exception when home team is empty after trimming")
+    @Test
+    void startMatch_shouldThrowException_whenHomeTeamIsEmptyAfterTrimming() {
+        String homeTeam = "   ";
+        String awayTeam = "Brazil";
+
+        assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
