@@ -6,8 +6,12 @@ import com.example.sportradar.api.exceptions.MatchAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -64,4 +68,35 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(MatchAlreadyExistsException.class);
     }
 
+    @DisplayName("should throw exception when team or both teams are empty")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideEmptyTeamNames")
+    void startMatch_shouldThrowException_whenTeamOrBothTeamsAreEmpty(String homeTeam, String awayTeam) {
+        assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private static Stream<Arguments> provideEmptyTeamNames() {
+        return Stream.of(
+                Arguments.of("", "Brazil"),
+                Arguments.of("Spain", ""),
+                Arguments.of("", "")
+        );
+    }
+
+    @DisplayName("should throw exception when team or both teams are null")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideNullTeamNames")
+    void startMatch_shouldThrowException_whenTeamOrBothTeamsAreNull(String homeTeam, String awayTeam) {
+        assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private static Stream<Arguments> provideNullTeamNames() {
+        return Stream.of(
+                Arguments.of(null, "Brazil"),
+                Arguments.of("Spain", null),
+                Arguments.of(null, null)
+        );
+    }
 }
