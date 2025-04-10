@@ -1,0 +1,67 @@
+package com.example.sportradar.internal;
+
+import com.example.sportradar.api.MatchScore;
+import com.example.sportradar.api.Scoreboard;
+import com.example.sportradar.api.exceptions.MatchAlreadyExistsException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+public class InMemoryScoreboardTest {
+    private Scoreboard scoreboard;
+    @BeforeEach
+    void setUp() {
+        scoreboard = new InMemoryScoreboard();
+    }
+
+    @DisplayName("should add match when two correct names are given")
+    @Test
+    void startMatch_shouldAddMatch_whenTwoCorrectNamesAreGiven() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(1)
+                .first()
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam)
+                .containsExactly(homeTeam, awayTeam);
+    }
+
+    @DisplayName("should initialize match with both teams having initial score")
+    @Test
+    void startMatch_shouldInitializeMatchWithBothTeamsHavingInitialScore() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(1)
+                .first()
+                .extracting(MatchScore::homeScore, MatchScore::awayScore)
+                .containsExactly(Scoreboard.INITIAL_SCORE, Scoreboard.INITIAL_SCORE);
+    }
+
+    @DisplayName("should throw exception when match already exists")
+    @Test
+    void startMatch_shouldThrowException_whenMatchAlreadyExists() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+        scoreboard.startMatch(homeTeam, awayTeam);
+
+        assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
+                .isInstanceOf(MatchAlreadyExistsException.class);
+    }
+
+}
