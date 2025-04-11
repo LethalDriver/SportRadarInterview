@@ -358,4 +358,79 @@ public class InMemoryScoreboardTest {
         assertThatThrownBy(() -> scoreboard.endMatch(homeTeam, awayTeam))
                 .isInstanceOf(MatchNotFoundException.class);
     }
+
+    @DisplayName("getMatchSummary: should return an empty list when no matches are in progress")
+    @Test
+    void getMatchSummary_shouldReturnEmptyList_whenNoMatchesInProgress() {
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary).isEmpty();
+    }
+
+    @DisplayName("getMatchSummary: should return a single match when only one match is in progress")
+    @Test
+    void getMatchSummary_shouldReturnSingleMatch_whenOnlyOneMatchInProgress() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(1)
+                .first()
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam)
+                .containsExactly(homeTeam, awayTeam);
+    }
+
+    @DisplayName("getMatchSummary: should return matches sorted by total score in descending order")
+    @Test
+    void getMatchSummary_shouldReturnMatchesSortedByTotalScoreInDescendingOrder() {
+        scoreboard.startMatch("Argentina", "Germany");
+        scoreboard.startMatch("Poland", "France");
+        scoreboard.startMatch("Spain", "Brazil");
+        scoreboard.updateScore("Spain", "Brazil", 3, 2);
+        scoreboard.updateScore("Argentina", "Germany", 1, 1);
+        scoreboard.updateScore("Poland", "France", 8, 0);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam, MatchScore::homeScore, MatchScore::awayScore)
+                .containsExactly(
+                        tuple("Poland", "France", 8, 0),
+                        tuple("Spain", "Brazil", 3, 2),
+                        tuple("Argentina", "Germany", 1, 1)
+                );
+    }
+
+    @DisplayName("getMatchSummary: should return matches with the same total score ordered by most recently started match")
+    @Test
+    void getMatchSummary_shouldReturnMatchesWithSameTotalScoreOrderedByMostRecentlyStartedMatch() {
+        scoreboard.startMatch("Spain", "Brazil");
+        scoreboard.startMatch("Argentina", "Germany");
+        scoreboard.updateScore("Spain", "Brazil", 2, 2);
+        scoreboard.updateScore("Argentina", "Germany", 2, 2);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam)
+                .containsExactly(
+                        tuple("Argentina", "Germany"),
+                        tuple("Spain", "Brazil")
+                );
+    }
+
+    @DisplayName("getMatchSummary: should handle matches with zero scores")
+    @Test
+    void getMatchSummary_shouldHandleMatchesWithZeroScores() {
+        scoreboard.startMatch("Spain", "Brazil");
+        scoreboard.startMatch("Argentina", "Germany");
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam, MatchScore::homeScore, MatchScore::awayScore)
+                .containsExactly(
+                        tuple("Argentina", "Germany", 0, 0),
+                        tuple("Spain", "Brazil", 0, 0)
+                );
+    }
 }
