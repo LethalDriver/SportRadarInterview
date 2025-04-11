@@ -22,12 +22,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 public class InMemoryScoreboardTest {
     private Scoreboard scoreboard;
+
     @BeforeEach
     void setUp() {
         scoreboard = new InMemoryScoreboard();
     }
 
-    @DisplayName("should add match when two correct names are given")
+    @DisplayName("startMatch: should add match when two correct names are given")
     @Test
     void startMatch_shouldAddMatch_whenTwoCorrectNamesAreGiven() {
         String homeTeam = "Spain";
@@ -43,7 +44,7 @@ public class InMemoryScoreboardTest {
                 .containsExactly(homeTeam, awayTeam);
     }
 
-    @DisplayName("should add multiple matches when different teams are given")
+    @DisplayName("startMatch: should add multiple matches when different teams are given")
     @Test
     void startMatch_shouldAddMultipleMatches_whenDifferentTeamsAreGiven() {
         String homeTeam1 = "Spain";
@@ -64,7 +65,7 @@ public class InMemoryScoreboardTest {
                 );
     }
 
-    @DisplayName("should initialize match with both teams having initial score")
+    @DisplayName("startMatch: should initialize match with both teams having initial score")
     @Test
     void startMatch_shouldInitializeMatchWithBothTeamsHavingInitialScore() {
         String homeTeam = "Spain";
@@ -80,7 +81,7 @@ public class InMemoryScoreboardTest {
                 .containsExactly(Scoreboard.INITIAL_SCORE, Scoreboard.INITIAL_SCORE);
     }
 
-    @DisplayName("should throw exception when match already exists")
+    @DisplayName("startMatch: should throw exception when match already exists")
     @Test
     void startMatch_shouldThrowException_whenMatchAlreadyExists() {
         String homeTeam = "Spain";
@@ -94,7 +95,7 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(MatchAlreadyExistsException.class);
     }
 
-    @DisplayName("should throw exception when team or both teams are empty")
+    @DisplayName("startMatch: should throw exception when team or both teams are empty")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
     @MethodSource("provideEmptyTeamNames")
     void startMatch_shouldThrowException_whenTeamOrBothTeamsAreEmpty(String homeTeam, String awayTeam) {
@@ -110,7 +111,7 @@ public class InMemoryScoreboardTest {
         );
     }
 
-    @DisplayName("should throw exception when team or both teams are null")
+    @DisplayName("startMatch: should throw exception when team or both teams are null")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
     @MethodSource("provideNullTeamNames")
     void startMatch_shouldThrowException_whenTeamOrBothTeamsAreNull(String homeTeam, String awayTeam) {
@@ -126,7 +127,7 @@ public class InMemoryScoreboardTest {
         );
     }
 
-    @DisplayName("should throw exception when both teams are the same")
+    @DisplayName("startMatch: should throw exception when both teams are the same")
     @Test
     void startMatch_shouldThrowException_whenBothTeamsAreTheSame() {
         String team = "Spain";
@@ -135,7 +136,7 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(DuplicateTeamNamesException.class);
     }
 
-    @DisplayName("should trim whitespaces from team names")
+    @DisplayName("startMatch: should trim whitespaces from team names")
     @Test
     void startMatch_shouldTrimWhitespacesFromTeamNames() {
         String homeTeam = "   Spain   ";
@@ -151,7 +152,7 @@ public class InMemoryScoreboardTest {
                 .containsExactly("Spain", "Brazil");
     }
 
-    @DisplayName("should throw exception when team or teams are empty after trimming")
+    @DisplayName("startMatch: should throw exception when team or teams are empty after trimming")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
     @MethodSource("provideWhiteSpaceTeamNames")
     void startMatch_shouldThrowException_whenHomeTeamIsEmptyAfterTrimming(String homeTeam, String awayTeam) {
@@ -167,7 +168,7 @@ public class InMemoryScoreboardTest {
         );
     }
 
-    @DisplayName("should throw exception when team is already in a match")
+    @DisplayName("startMatch: should throw exception when team is already in a match")
     @Test
     void startMatch_shouldThrowException_whenTeamIsAlreadyInAMatch() {
         String homeTeam = "Spain";
@@ -181,7 +182,7 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(TeamAlreadyInMatchException.class);
     }
 
-    @DisplayName("should update score when match is ongoing")
+    @DisplayName("updateScore: should update score when match is ongoing")
     @Test
     void updateScore_shouldUpdateScore_whenMatchIsOngoing() {
         String homeTeam = "Spain";
@@ -198,7 +199,7 @@ public class InMemoryScoreboardTest {
                 .containsExactly(1, 2);
     }
 
-    @DisplayName("should update scores for multiple ongoing matches")
+    @DisplayName("updateScore: should update scores for multiple ongoing matches")
     @Test
     void updateScore_shouldUpdateScoresForMultipleOngoingMatches() {
         String homeTeam1 = "Spain";
@@ -222,7 +223,7 @@ public class InMemoryScoreboardTest {
                 );
     }
 
-    @DisplayName("should throw exception when match is not started")
+    @DisplayName("updateScore: should throw exception when match is not started")
     @Test
     void updateScore_shouldThrowException_whenMatchIsNotStarted() {
         String homeTeam = "Spain";
@@ -232,7 +233,7 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(MatchNotFoundException.class);
     }
 
-    @DisplayName("should throw exception when team names are empty")
+    @DisplayName("updateScore: should throw exception when team names are empty")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
     @MethodSource("provideEmptyTeamNames")
     void updateScore_shouldThrowException_whenTeamNamesAreEmpty(String homeTeam, String awayTeam) {
@@ -240,7 +241,7 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @DisplayName("should throw exception when team names are null")
+    @DisplayName("updateScore: should throw exception when team names are null")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
     @MethodSource("provideNullTeamNames")
     void updateScore_shouldThrowException_whenTeamNamesAreNull(String homeTeam, String awayTeam) {
@@ -248,7 +249,7 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @DisplayName("should throw exception when team or teams are empty after trimming")
+    @DisplayName("updateScore: should throw exception when team or teams are empty after trimming")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
     @MethodSource("provideWhiteSpaceTeamNames")
     void updateScore_shouldThrowException_whenTeamNamesAreEmptyAfterTrimming(String homeTeam, String awayTeam) {
@@ -256,8 +257,7 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-
-    @DisplayName("should throw exception when match is already ended")
+    @DisplayName("updateScore: should throw exception when match is already ended")
     @Test
     void updateScore_shouldThrowException_whenMatchIsAlreadyEnded() {
         String homeTeam = "Spain";
@@ -270,7 +270,7 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(MatchNotFoundException.class);
     }
 
-    @DisplayName("should throw exception when score or scores are negative")
+    @DisplayName("updateScore: should throw exception when score or scores are negative")
     @ParameterizedTest(name = "homeScore: {0}, awayScore: {1}")
     @MethodSource("provideNegativeScores")
     void updateScore_shouldThrowException_whenScoreOrScoresAreNegative(int homeScore, int awayScore) {
