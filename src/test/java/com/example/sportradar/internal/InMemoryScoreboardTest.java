@@ -290,4 +290,72 @@ public class InMemoryScoreboardTest {
                 Arguments.of(-1, -1)
         );
     }
+
+    @DisplayName("endMatch: should end match when match is ongoing")
+    @Test
+    void endMatch_shouldEndMatch_whenMatchIsOngoing() {
+        String homeTeam1 = "Spain";
+        String awayTeam1 = "Brazil";
+        String homeTeam2 = "Argentina";
+        String awayTeam2 = "Germany";
+
+        scoreboard.startMatch(homeTeam1, awayTeam1);
+        scoreboard.startMatch(homeTeam2, awayTeam2);
+
+        scoreboard.endMatch(homeTeam1, awayTeam1);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(1)
+                .first()
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam)
+                .containsExactly(homeTeam2, awayTeam2);
+    }
+
+    @DisplayName("endMatch: should throw exception when team names are empty")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideEmptyTeamNames")
+    void endMatch_shouldThrowException_whenTeamNamesAreEmpty(String homeTeam, String awayTeam) {
+        assertThatThrownBy(() -> scoreboard.endMatch(homeTeam, awayTeam))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("endMatch: should throw exception when team names are null")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideNullTeamNames")
+    void endMatch_shouldThrowException_whenTeamNamesAreNull(String homeTeam, String awayTeam) {
+        assertThatThrownBy(() -> scoreboard.endMatch(homeTeam, awayTeam))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("endMatch: should throw exception when team names are empty after trimming")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideWhiteSpaceTeamNames")
+    void endMatch_shouldThrowException_whenTeamNamesAreEmptyAfterTrimming(String homeTeam, String awayTeam) {
+        assertThatThrownBy(() -> scoreboard.endMatch(homeTeam, awayTeam))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("endMatch: should throw exception when match is not started")
+    @Test
+    void endMatch_shouldThrowException_whenMatchIsNotStarted() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        assertThatThrownBy(() -> scoreboard.endMatch(homeTeam, awayTeam))
+                .isInstanceOf(MatchNotFoundException.class);
+    }
+
+    @DisplayName("endMatch: should throw exception when match is already ended")
+    @Test
+    void endMatch_shouldThrowException_whenMatchIsAlreadyEnded() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+        scoreboard.endMatch(homeTeam, awayTeam);
+
+        assertThatThrownBy(() -> scoreboard.endMatch(homeTeam, awayTeam))
+                .isInstanceOf(MatchNotFoundException.class);
+    }
 }
