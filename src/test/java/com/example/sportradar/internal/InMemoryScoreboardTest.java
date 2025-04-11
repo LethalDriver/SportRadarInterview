@@ -4,6 +4,7 @@ import com.example.sportradar.api.MatchScore;
 import com.example.sportradar.api.Scoreboard;
 import com.example.sportradar.api.exceptions.DuplicateTeamNamesException;
 import com.example.sportradar.api.exceptions.MatchAlreadyExistsException;
+import com.example.sportradar.api.exceptions.MatchNotFoundException;
 import com.example.sportradar.api.exceptions.TeamAlreadyInMatchException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -178,5 +179,115 @@ public class InMemoryScoreboardTest {
                 .isInstanceOf(TeamAlreadyInMatchException.class);
         assertThatThrownBy(() -> scoreboard.startMatch("Argentina", awayTeam))
                 .isInstanceOf(TeamAlreadyInMatchException.class);
+    }
+
+    @DisplayName("should update score when match is ongoing")
+    @Test
+    void updateScore_shouldUpdateScore_whenMatchIsOngoing() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+        scoreboard.updateScore(homeTeam, awayTeam, 1, 2);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(1)
+                .first()
+                .extracting(MatchScore::homeScore, MatchScore::awayScore)
+                .containsExactly(1, 2);
+    }
+
+    @DisplayName("should update scores for multiple ongoing matches")
+    @Test
+    void updateScore_shouldUpdateScoresForMultipleOngoingMatches() {
+        String homeTeam1 = "Spain";
+        String awayTeam1 = "Brazil";
+        String homeTeam2 = "Argentina";
+        String awayTeam2 = "Germany";
+
+        scoreboard.startMatch(homeTeam1, awayTeam1);
+        scoreboard.startMatch(homeTeam2, awayTeam2);
+
+        scoreboard.updateScore(homeTeam1, awayTeam1, 1, 2);
+        scoreboard.updateScore(homeTeam2, awayTeam2, 3, 4);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(2)
+                .extracting(MatchScore::homeScore, MatchScore::awayScore)
+                .containsExactlyInAnyOrder(
+                        tuple(1, 2),
+                        tuple(3, 4)
+                );
+    }
+
+    @DisplayName("should throw exception when match is not started")
+    @Test
+    void updateScore_shouldThrowException_whenMatchIsNotStarted() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        assertThatThrownBy(() -> scoreboard.updateScore(homeTeam, awayTeam, 1, 2))
+                .isInstanceOf(MatchNotFoundException.class);
+    }
+
+    @DisplayName("should throw exception when team names are empty")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideEmptyTeamNames")
+    void updateScore_shouldThrowException_whenTeamNamesAreEmpty(String homeTeam, String awayTeam) {
+        assertThatThrownBy(() -> scoreboard.updateScore(homeTeam, awayTeam, 1, 2))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("should throw exception when team names are null")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideNullTeamNames")
+    void updateScore_shouldThrowException_whenTeamNamesAreNull(String homeTeam, String awayTeam) {
+        assertThatThrownBy(() -> scoreboard.updateScore(homeTeam, awayTeam, 1, 2))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("should throw exception when team or teams are empty after trimming")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideWhiteSpaceTeamNames")
+    void updateScore_shouldThrowException_whenTeamNamesAreEmptyAfterTrimming(String homeTeam, String awayTeam) {
+        assertThatThrownBy(() -> scoreboard.updateScore(homeTeam, awayTeam, 1, 2))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+
+    @DisplayName("should throw exception when match is already ended")
+    @Test
+    void updateScore_shouldThrowException_whenMatchIsAlreadyEnded() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+        scoreboard.endMatch(homeTeam, awayTeam);
+
+        assertThatThrownBy(() -> scoreboard.updateScore(homeTeam, awayTeam, 1, 2))
+                .isInstanceOf(MatchNotFoundException.class);
+    }
+
+    @DisplayName("should throw exception when score or scores are negative")
+    @ParameterizedTest(name = "homeScore: {0}, awayScore: {1}")
+    @MethodSource("provideNegativeScores")
+    void updateScore_shouldThrowException_whenScoreOrScoresAreNegative(int homeScore, int awayScore) {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+
+        assertThatThrownBy(() -> scoreboard.updateScore(homeTeam, awayTeam, homeScore, awayScore))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private static Stream<Arguments> provideNegativeScores() {
+        return Stream.of(
+                Arguments.of(-1, 0),
+                Arguments.of(0, -1),
+                Arguments.of(-1, -1)
+        );
     }
 }
