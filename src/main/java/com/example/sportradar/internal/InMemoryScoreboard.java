@@ -37,10 +37,7 @@ public class InMemoryScoreboard implements Scoreboard {
 
     @Override
     public void updateScore(String homeTeam, String awayTeam, int homeScore, int awayScore) {
-        if (homeScore < 0 || awayScore < 0) {
-            throw new IllegalArgumentException("Scores cannot be negative");
-        }
-
+        throwIfScoreIsNegative(homeScore, awayScore);
         throwIfNamesNullOrBlank(homeTeam, awayTeam);
 
         homeTeam = homeTeam.trim();
@@ -58,6 +55,7 @@ public class InMemoryScoreboard implements Scoreboard {
         );
     }
 
+
     @Override
     public void endMatch(String homeTeam, String awayTeam) {
 
@@ -68,6 +66,12 @@ public class InMemoryScoreboard implements Scoreboard {
         return matches.stream()
                 .map(match -> new MatchScore(match.getHomeTeam(), match.getAwayTeam(), match.getHomeScore(), match.getAwayScore()))
                 .toList();
+    }
+
+    private void throwIfScoreIsNegative(int homeScore, int awayScore) {
+        if (homeScore < 0 || awayScore < 0) {
+            throw new IllegalArgumentException("Scores cannot be negative");
+        }
     }
 
     private void throwIfNamesNullOrBlank(String homeTeam, String awayTeam) {
