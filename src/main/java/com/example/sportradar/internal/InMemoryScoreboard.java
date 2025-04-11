@@ -78,6 +78,21 @@ public class InMemoryScoreboard implements Scoreboard {
     @Override
     public List<MatchScore> getMatchSummary() {
         return matches.stream()
+                .sorted((match1, match2) -> {
+                    // Compare by total score first
+                    int scoreComparison = Integer.compare(
+                            (match2.getHomeScore() + match2.getAwayScore()),
+                            (match1.getHomeScore() + match1.getAwayScore())
+                    );
+
+                    // If scores not equal, use the total score for sorting
+                    if (scoreComparison != 0) {
+                        return scoreComparison;
+                    }
+
+                    // If scores are equal, sort by inverse of order of insertion
+                    return Integer.compare(matches.indexOf(match2), matches.indexOf(match1));
+                })
                 .map(match -> new MatchScore(match.getHomeTeam(), match.getAwayTeam(), match.getHomeScore(), match.getAwayScore()))
                 .toList();
     }
