@@ -6,11 +6,11 @@ class Match {
     private int homeScore;
     private int awayScore;
 
-    Match(String homeTeam, String awayTeam) {
+    Match(String homeTeam, String awayTeam, int homeScore, int awayScore) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
-        this.homeScore = 0;
-        this.awayScore = 0;
+        this.homeScore = homeScore;
+        this.awayScore = awayScore;
     }
 
     String getHomeTeam() {

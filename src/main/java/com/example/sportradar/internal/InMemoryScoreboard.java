@@ -31,7 +31,7 @@ public class InMemoryScoreboard implements Scoreboard {
             throwIfTeamInAMatch(match, awayTeam);
         }
 
-        matches.add(new Match(homeTeam, awayTeam));
+        matches.add(new Match(homeTeam, awayTeam, INITIAL_SCORE, INITIAL_SCORE));
     }
 
     @Override
