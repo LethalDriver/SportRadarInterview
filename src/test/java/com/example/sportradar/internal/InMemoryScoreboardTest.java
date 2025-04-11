@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 public class InMemoryScoreboardTest {
     private Scoreboard scoreboard;
@@ -39,6 +40,27 @@ public class InMemoryScoreboardTest {
                 .first()
                 .extracting(MatchScore::homeTeam, MatchScore::awayTeam)
                 .containsExactly(homeTeam, awayTeam);
+    }
+
+    @DisplayName("should add multiple matches when different teams are given")
+    @Test
+    void startMatch_shouldAddMultipleMatches_whenDifferentTeamsAreGiven() {
+        String homeTeam1 = "Spain";
+        String awayTeam1 = "Brazil";
+        String homeTeam2 = "Argentina";
+        String awayTeam2 = "Germany";
+
+        scoreboard.startMatch(homeTeam1, awayTeam1);
+        scoreboard.startMatch(homeTeam2, awayTeam2);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(2)
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam)
+                .containsExactlyInAnyOrder(
+                        tuple(homeTeam1, awayTeam1),
+                        tuple(homeTeam2, awayTeam2)
+                );
     }
 
     @DisplayName("should initialize match with both teams having initial score")
