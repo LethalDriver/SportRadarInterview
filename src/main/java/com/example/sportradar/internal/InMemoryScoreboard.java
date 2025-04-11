@@ -68,12 +68,12 @@ public class InMemoryScoreboard implements Scoreboard {
     }
 
     private boolean isMatchEqual(Match existingMatch, String homeTeam, String awayTeam) {
-        return existingMatch.getHomeTeam().equals(homeTeam) && existingMatch.getAwayTeam().equals(awayTeam);
+        return existingMatch.getHomeTeam().equals(homeTeam) && existingMatch.getAwayTeam().equals(awayTeam) ||
+                existingMatch.getHomeTeam().equals(awayTeam) && existingMatch.getAwayTeam().equals(homeTeam);
     }
 
     private void throwIfMatchEqual(Match existingMatch, String homeTeam, String awayTeam) {
-        if (isMatchEqual(existingMatch, homeTeam, awayTeam) ||
-                isMatchEqual(existingMatch, awayTeam, homeTeam)) {
+        if (isMatchEqual(existingMatch, homeTeam, awayTeam)) {
             throw new MatchAlreadyExistsException(
                     String.format("Match already exists for teams: %s vs %s", homeTeam, awayTeam)
             );
