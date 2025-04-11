@@ -133,6 +133,7 @@ public class InMemoryScoreboard implements Scoreboard {
         }
     }
 
+    // Treat the match as equal if the teams are the same, regardless of order
     private boolean isMatchEqual(Match existingMatch, String homeTeam, String awayTeam) {
         return existingMatch.getHomeTeam().equals(homeTeam) && existingMatch.getAwayTeam().equals(awayTeam) ||
                 existingMatch.getHomeTeam().equals(awayTeam) && existingMatch.getAwayTeam().equals(homeTeam);
