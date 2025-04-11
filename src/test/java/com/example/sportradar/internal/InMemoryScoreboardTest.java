@@ -154,13 +154,13 @@ public class InMemoryScoreboardTest {
 
     @DisplayName("startMatch: should throw exception when team or teams are empty after trimming")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
-    @MethodSource("provideWhiteSpaceTeamNames")
+    @MethodSource("provideEmptyTeamNamesWithWhitespace")
     void startMatch_shouldThrowException_whenHomeTeamIsEmptyAfterTrimming(String homeTeam, String awayTeam) {
         assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    private static Stream<Arguments> provideWhiteSpaceTeamNames() {
+    private static Stream<Arguments> provideEmptyTeamNamesWithWhitespace() {
         return Stream.of(
                 Arguments.of("   ", "Brazil"),
                 Arguments.of("Spain", "   "),
@@ -223,6 +223,25 @@ public class InMemoryScoreboardTest {
                 );
     }
 
+    @DisplayName("updateScore: should trim whitespaces from team names")
+    @Test
+    void updateScore_shouldTrimWhitespacesFromTeamNames() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+        String homeTeamWithWhitespace = "   Spain   ";
+        String awayTeamWithWhitespace = "   Brazil   ";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+        scoreboard.updateScore(homeTeamWithWhitespace, awayTeamWithWhitespace, 1, 2);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .hasSize(1)
+                .first()
+                .extracting(MatchScore::homeTeam, MatchScore::awayTeam)
+                .containsExactly("Spain", "Brazil");
+    }
+
     @DisplayName("updateScore: should throw exception when match is not started")
     @Test
     void updateScore_shouldThrowException_whenMatchIsNotStarted() {
@@ -251,7 +270,7 @@ public class InMemoryScoreboardTest {
 
     @DisplayName("updateScore: should throw exception when team or teams are empty after trimming")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
-    @MethodSource("provideWhiteSpaceTeamNames")
+    @MethodSource("provideEmptyTeamNamesWithWhitespace")
     void updateScore_shouldThrowException_whenTeamNamesAreEmptyAfterTrimming(String homeTeam, String awayTeam) {
         assertThatThrownBy(() -> scoreboard.updateScore(homeTeam, awayTeam, 1, 2))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -312,6 +331,22 @@ public class InMemoryScoreboardTest {
                 .containsExactly(homeTeam2, awayTeam2);
     }
 
+    @DisplayName("endMatch: should trim whitespaces from team names")
+    @Test
+    void endMatch_shouldTrimWhitespacesFromTeamNames() {
+        String homeTeam = "Spain";
+        String awayTeam = "Brazil";
+        String homeTeamWithWhitespace = "   Spain   ";
+        String awayTeamWithWhitespace = "   Brazil   ";
+
+        scoreboard.startMatch(homeTeam, awayTeam);
+        scoreboard.endMatch(homeTeamWithWhitespace, awayTeamWithWhitespace);
+
+        List<MatchScore> summary = scoreboard.getMatchSummary();
+        assertThat(summary)
+                .isEmpty();
+    }
+
     @DisplayName("endMatch: should throw exception when team names are empty")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
     @MethodSource("provideEmptyTeamNames")
@@ -330,7 +365,7 @@ public class InMemoryScoreboardTest {
 
     @DisplayName("endMatch: should throw exception when team names are empty after trimming")
     @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
-    @MethodSource("provideWhiteSpaceTeamNames")
+    @MethodSource("provideEmptyTeamNamesWithWhitespace")
     void endMatch_shouldThrowException_whenTeamNamesAreEmptyAfterTrimming(String homeTeam, String awayTeam) {
         assertThatThrownBy(() -> scoreboard.endMatch(homeTeam, awayTeam))
                 .isInstanceOf(IllegalArgumentException.class);
