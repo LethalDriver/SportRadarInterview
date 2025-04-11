@@ -21,8 +21,8 @@ public class InMemoryScoreboard implements Scoreboard {
     public void startMatch(String homeTeam, String awayTeam) {
         throwIfNamesNullOrBlank(homeTeam, awayTeam);
 
-        homeTeam = homeTeam.trim();
-        awayTeam = awayTeam.trim();
+        homeTeam = cleanTeamName(homeTeam);
+        awayTeam = cleanTeamName(awayTeam);
 
         throwIfNamesAreEqual(homeTeam, awayTeam);
 
@@ -40,8 +40,8 @@ public class InMemoryScoreboard implements Scoreboard {
         throwIfScoreIsNegative(homeScore, awayScore);
         throwIfNamesNullOrBlank(homeTeam, awayTeam);
 
-        homeTeam = homeTeam.trim();
-        awayTeam = awayTeam.trim();
+        homeTeam = cleanTeamName(homeTeam);
+        awayTeam = cleanTeamName(awayTeam);
 
         for (Match match : matches) {
             if (isMatchEqual(match, homeTeam, awayTeam)) {
@@ -60,8 +60,8 @@ public class InMemoryScoreboard implements Scoreboard {
     public void endMatch(String homeTeam, String awayTeam) {
         throwIfNamesNullOrBlank(homeTeam, awayTeam);
 
-        homeTeam = homeTeam.trim();
-        awayTeam = awayTeam.trim();
+        homeTeam = cleanTeamName(homeTeam);
+        awayTeam = cleanTeamName(awayTeam);
 
         for (Match match : matches) {
             if (isMatchEqual(match, homeTeam, awayTeam)) {
@@ -80,6 +80,10 @@ public class InMemoryScoreboard implements Scoreboard {
         return matches.stream()
                 .map(match -> new MatchScore(match.getHomeTeam(), match.getAwayTeam(), match.getHomeScore(), match.getAwayScore()))
                 .toList();
+    }
+
+    private String cleanTeamName(String teamName) {
+        return teamName.trim();
     }
 
     private void throwIfScoreIsNegative(int homeScore, int awayScore) {
