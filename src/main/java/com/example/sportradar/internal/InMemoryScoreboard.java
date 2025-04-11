@@ -4,6 +4,7 @@ import com.example.sportradar.api.MatchScore;
 import com.example.sportradar.api.Scoreboard;
 import com.example.sportradar.api.exceptions.DuplicateTeamNamesException;
 import com.example.sportradar.api.exceptions.MatchAlreadyExistsException;
+import com.example.sportradar.api.exceptions.MatchNotFoundException;
 import com.example.sportradar.api.exceptions.TeamAlreadyInMatchException;
 
 import java.util.ArrayList;
@@ -36,7 +37,25 @@ public class InMemoryScoreboard implements Scoreboard {
 
     @Override
     public void updateScore(String homeTeam, String awayTeam, int homeScore, int awayScore) {
+        if (homeScore < 0 || awayScore < 0) {
+            throw new IllegalArgumentException("Scores cannot be negative");
+        }
 
+        throwIfNamesNullOrBlank(homeTeam, awayTeam);
+
+        homeTeam = homeTeam.trim();
+        awayTeam = awayTeam.trim();
+
+        for (Match match : matches) {
+            if (isMatchEqual(match, homeTeam, awayTeam)) {
+                match.updateScore(homeScore, awayScore);
+                return;
+            }
+        }
+
+        throw new MatchNotFoundException(
+                String.format("Match does not exist for teams: %s vs %s", homeTeam, awayTeam)
+        );
     }
 
     @Override
