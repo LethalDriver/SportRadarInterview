@@ -67,6 +67,8 @@ public class InMemoryScoreboardTest {
 
         assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
                 .isInstanceOf(MatchAlreadyExistsException.class);
+        assertThatThrownBy(() -> scoreboard.startMatch(awayTeam, homeTeam))
+                .isInstanceOf(MatchAlreadyExistsException.class);
     }
 
     @DisplayName("should throw exception when team or both teams are empty")
