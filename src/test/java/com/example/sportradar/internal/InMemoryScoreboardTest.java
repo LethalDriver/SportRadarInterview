@@ -128,14 +128,20 @@ public class InMemoryScoreboardTest {
                 .containsExactly("Spain", "Brazil");
     }
 
-    @DisplayName("should throw exception when home team is empty after trimming")
-    @Test
-    void startMatch_shouldThrowException_whenHomeTeamIsEmptyAfterTrimming() {
-        String homeTeam = "   ";
-        String awayTeam = "Brazil";
-
+    @DisplayName("should throw exception when team or teams are empty after trimming")
+    @ParameterizedTest(name = "homeTeam: \"{0}\", awayTeam: \"{1}\"")
+    @MethodSource("provideWhiteSpaceTeamNames")
+    void startMatch_shouldThrowException_whenHomeTeamIsEmptyAfterTrimming(String homeTeam, String awayTeam) {
         assertThatThrownBy(() -> scoreboard.startMatch(homeTeam, awayTeam))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private static Stream<Arguments> provideWhiteSpaceTeamNames() {
+        return Stream.of(
+                Arguments.of("   ", "Brazil"),
+                Arguments.of("Spain", "   "),
+                Arguments.of("   ", "   ")
+        );
     }
 
     @DisplayName("should throw exception when team is already in a match")
