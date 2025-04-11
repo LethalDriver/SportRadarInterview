@@ -58,7 +58,21 @@ public class InMemoryScoreboard implements Scoreboard {
 
     @Override
     public void endMatch(String homeTeam, String awayTeam) {
+        throwIfNamesNullOrBlank(homeTeam, awayTeam);
 
+        homeTeam = homeTeam.trim();
+        awayTeam = awayTeam.trim();
+
+        for (Match match : matches) {
+            if (isMatchEqual(match, homeTeam, awayTeam)) {
+                matches.remove(match);
+                return;
+            }
+        }
+
+        throw new MatchNotFoundException(
+                String.format("Match does not exist for teams: %s vs %s", homeTeam, awayTeam)
+        );
     }
 
     @Override
